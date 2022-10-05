@@ -1,0 +1,517 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Tutorial: Advanced usage of DeepProg model &mdash; DeepProg  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Case study: Analyzing TCGA HCC dataset" href="case_study.html" />
+    <link rel="prev" title="Tutorial: Ensemble of DeepProg model" href="usage_ensemble.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> DeepProg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Tutorial: Simple DeepProg model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_ensemble.html">Tutorial: Ensemble of DeepProg model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial: Advanced usage of DeepProg model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#visualisation">Visualisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hyperparameters">Hyperparameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#normalisation">Normalisation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clustering-algorithm">Clustering algorithm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#embedding-and-survival-features-selection">Embedding and survival features selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#number-of-models-and-random-splitting-seed">Number of models and random splitting seed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-of-metadata-associated-with-patients">Usage of metadata associated with patients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#computing-cluster-specific-feature-signatures">Computing cluster-specific feature signatures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#save-load-models">Save / load models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#save-load-the-entire-model">Save /load the entire model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-load-models-from-precomputed-sample-labels">Save / load models from precomputed sample labels</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="case_study.html">Case study: Analyzing TCGA HCC dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_tuning.html">Tutorial: Tuning DeepProg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/simdeep.html">simdeep package</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DeepProg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Tutorial: Advanced usage of DeepProg model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/usage_advanced.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tutorial-advanced-usage-of-deepprog-model">
+<h1>Tutorial: Advanced usage of DeepProg model<a class="headerlink" href="#tutorial-advanced-usage-of-deepprog-model" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="visualisation">
+<h2>Visualisation<a class="headerlink" href="#visualisation" title="Permalink to this headline">¶</a></h2>
+<p>Once a DeepProg model is fitted, it might be interessant to obtain different visualisations of the samples for the training or the test sets, based on new survival features inferred by the autoencoders.For that purpose, we developped two methods to project the samples into a 2D space that can be called once a <code class="docutils literal notranslate"><span class="pre">SimDeepBoosting</span></code> or a <code class="docutils literal notranslate"><span class="pre">simDeep</span></code> is fitted.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># boosting class instance fitted using the ensemble tutorial</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">plot_supervised_predicted_labels_for_test_sets</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The first method transforms the OMIC matrix activities into the new survival feature space inferred by the autoencoders and projects the samples into a 2D space using  PCA analysis. The figure creates a kernel density for each cluster and project the labels of the test set.</p>
+<p><img alt="kdplot 1" src="_images/stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test_kde_2_cropped.png" /></p>
+<p>A second more sophisticated method uses the new features inferred by the autoencoders to compute new features by constructing a supervised network targetting the inferred subtype labels. The new set of features are then projected into a 2D space using PCA analysis. This second method might present more efficient visualisations of the different clusters since it is uses a supervised algorithm.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">boosting</span><span class="o">.</span><span class="n">plot_supervised_kernel_for_test_sets</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><img alt="kdplot 2" src="_images/stacked_TestProject_TEST_DATA_2_KM_plot_boosting_test_kde_1_cropped.png" /></p>
+<p>Note that these visualisation are not very efficient in that example dataset, since we have only a limited number of samples (40) and features. However, they might become more useful for real datasets.</p>
+</div>
+<div class="section" id="hyperparameters">
+<h2>Hyperparameters<a class="headerlink" href="#hyperparameters" title="Permalink to this headline">¶</a></h2>
+<p>Hyperparameters can have a considerable influence on the accuracy of DeepProgs models. We set up the default hyperparameters to be used on a maximum of different datasets. However, specific datasets might require additional optimizations. Below, we are listing</p>
+<div class="section" id="normalisation">
+<h3>Normalisation<a class="headerlink" href="#normalisation" title="Permalink to this headline">¶</a></h3>
+<p>DeepProg uses by default a four-step normalisation for both training and test datasets:</p>
+<ol class="simple">
+<li><p>Selection of the top 100 features according to the variances</p></li>
+<li><p>Rank normalisation per sample</p></li>
+<li><p>Sample-sample Correlation similarity transformation</p></li>
+<li><p>Rank normalisation</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">default_normalisation</span> <span class="o">=</span>  <span class="p">{</span>
+    <span class="s1">&#39;NB_FEATURES_TO_KEEP&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s1">&#39;TRAIN_RANK_NORM&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s1">&#39;TRAIN_CORR_REDUCTION&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s1">&#39;TRAIN_CORR_RANK_NORM&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+        <span class="n">normalization</span><span class="o">=</span><span class="n">default_normalisation</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>However, it is possible to use other normalisation using external python classes that have <code class="docutils literal notranslate"><span class="pre">fit</span></code> and <code class="docutils literal notranslate"><span class="pre">fit_transform</span></code> methods.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>from sklearn.preprocessing import RobustScaler
+
+custom_norm =  {
+    &#39;CUSTOM&#39;: RobustScaler,
+}
+
+boosting = SimDeepBoosting(
+        normalization=custom_norm
+    )
+
+    ```
+
+Finally, more alternative normalisations are proposed in the config file.
+
+### Number of clusters
+
+The parameters `nb_clusters` is used to define the number of partitions to produce
+
+```python
+#Example
+boosting = SimDeepBoosting(
+    nb_clusters=3)
+boosting.fit()
+</pre></div>
+</div>
+</div>
+<div class="section" id="clustering-algorithm">
+<h3>Clustering algorithm<a class="headerlink" href="#clustering-algorithm" title="Permalink to this headline">¶</a></h3>
+<p>By default, DeepProg is using a gaussian mixture model from the scikit-learn library  to perform clustering. The hyperparameter of the model are customisable using the <code class="docutils literal notranslate"><span class="pre">mixture_params</span></code> parameter:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Default params from the config file:</span>
+
+<span class="n">MIXTURE_PARAMS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;covariance_type&#39;</span><span class="p">:</span> <span class="s1">&#39;diag&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;max_iter&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="s1">&#39;n_init&#39;</span><span class="p">:</span> <span class="mi">100</span>
+    <span class="p">}</span>
+
+<span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+    <span class="n">mixture_params</span><span class="o">=</span><span class="n">MIXTURE_PARAMS</span><span class="p">,</span>
+    <span class="n">nb_clusters</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">cluster_method</span><span class="o">=</span><span class="s1">&#39;mixture&#39;</span> <span class="c1"># Default</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>In addition to the gaussian mixture model, three alternative clustering approaches are available: a) <code class="docutils literal notranslate"><span class="pre">kmeans</span></code>, which refers to the scikit-learn KMeans class, b) <code class="docutils literal notranslate"><span class="pre">coxPH</span></code> which fits a L1 penalized multi-dimensional Cox-PH model and then dichotomize the samples into K groups using the  predicted suvival times, and c) <code class="docutils literal notranslate"><span class="pre">coxPHMixture</span></code> which fit a Mixture model on the predicted survival time from the L1 penalized Cox-PH model. The L1 penalised Cox-PH model is fitted using scikit-survival <code class="docutils literal notranslate"><span class="pre">CoxnetSurvivalAnalysis</span></code>class for python3 so it cannot be computed when using python 2. Finally, external clustering class instances can be used as long as they have a <code class="docutils literal notranslate"><span class="pre">fit_predict</span></code> method returning an array of labels, and accepting a <code class="docutils literal notranslate"><span class="pre">nb_clusters</span></code> parameter.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># External clustering class having fit_predict method</span>
+<span class="kn">from</span> <span class="nn">sklearn.cluster.hierarchical</span> <span class="kn">import</span> <span class="n">AgglomerativeClustering</span>
+
+<span class="n">boostingH</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+        <span class="n">nb_clusters</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">cluster_method</span><span class="o">=</span><span class="n">AgglomerativeClustering</span> <span class="c1"># Default</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">DummyClustering</span><span class="p">:</span>
+    <span class="bp">self</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nb_clusters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nb_clusters</span>
+
+    <span class="k">def</span> <span class="nf">fit_predict</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_clusters</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+<span class="n">boostingDummy</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+        <span class="n">nb_clusters</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">cluster_method</span><span class="o">=</span><span class="n">DummyClustering</span> <span class="c1"># Default</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="embedding-and-survival-features-selection">
+<h3>Embedding and survival features selection<a class="headerlink" href="#embedding-and-survival-features-selection" title="Permalink to this headline">¶</a></h3>
+<p>after  each omic matrix is normalised, DeepProg transforms each feature matrix using by default an autoencoder network as embedding algorithm and then select the transformed features linked to survival using univariate Cox-PH models. Alternatively, DeepProg can accept any external embedding algorithm having a <code class="docutils literal notranslate"><span class="pre">fit</span></code> and transform <code class="docutils literal notranslate"><span class="pre">method</span></code>, following the scikit-learn nomenclature. For instance, <code class="docutils literal notranslate"><span class="pre">PCA</span></code> and <code class="docutils literal notranslate"><span class="pre">fastICA</span></code> classes of the scikit-learn package can be used as replacement for the autoencoder.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example using PCA as alternative embedding.</span>
+
+
+<span class="kn">from</span> <span class="nn">scklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
+
+
+<span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+        <span class="n">nb_clusters</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">alternative_embedding</span><span class="o">=</span><span class="n">PCA</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>Another example is the use of the MAUI multi-omic method instead of the autoencoder</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MauiFitting</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">Maui</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">({</span><span class="s1">&#39;cat&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">transform</span><span class="p">({</span><span class="s1">&#39;cat&#39;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+
+    <span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+        <span class="n">nb_clusters</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">alternative_embedding</span><span class="o">=</span><span class="n">MauiFitting</span><span class="p">,</span>
+        <span class="o">...</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>After the embedding step, DeepProg is computing by default the individual feature contribution toward survival using univariate Cox-PH model (<code class="docutils literal notranslate"><span class="pre">feature_selection_usage='individual'</span></code>). Alternatively, DeepProg can select features linked to survival using a l1-penalized multivariate Cox-PH model (<code class="docutils literal notranslate"><span class="pre">feature_selection_usage='individual'lasso'</span></code>). Finally if the option <code class="docutils literal notranslate"><span class="pre">feature_surv_analysis</span></code> is parsed as False, DeepProg will skip the survival feature selection step.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example using l1-penalized Cox-PH for selecting new survival features.</span>
+
+
+<span class="kn">from</span> <span class="nn">scklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
+
+
+<span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+        <span class="n">nb_clusters</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">feature_selection_usage</span><span class="o">=</span><span class="s1">&#39;individual&#39;</span><span class="n">lasso</span><span class="s1">&#39;,</span>
+        <span class="c1"># feature_surv_analysis=False # Not using feature selection step</span>
+        <span class="o">...</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="number-of-models-and-random-splitting-seed">
+<h3>Number of models and random splitting seed<a class="headerlink" href="#number-of-models-and-random-splitting-seed" title="Permalink to this headline">¶</a></h3>
+<p>A DeepProg model is constructed using an ensemble of submodels following the <a class="reference external" href="https://en.wikipedia.org/wiki/Ensemble_learning#Bootstrap_aggregating_(bagging)">Bagging</a> methodology. Each sub-model is created from a random split of the input dataset. Three parameters control the creation of the random splits:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-nb_it</span> <span class="pre">&lt;int&gt;</span></code> which defines the number of sub-models to create</p></li>
+<li><p>and <code class="docutils literal notranslate"><span class="pre">-split_n_fold</span> </code> which controls how the dataset will be splitted for each submodel. If <code class="docutils literal notranslate"><span class="pre">-split_n_fold=2</span></code>, the input dataset will be splitted in 2 using the <code class="docutils literal notranslate"><span class="pre">KFold</span></code> class instance from <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html">sciki-learn</a> and the training /test set size ratio will be 0.5. If  <code class="docutils literal notranslate"><span class="pre">-split_n_fold=3</span></code> the training /test set size ratio will be 3 / 2 and so on.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">-seed</span></code> parameter ensures to obtain the same random splitting for <code class="docutils literal notranslate"><span class="pre">split_n_fold</span></code> and <code class="docutils literal notranslate"><span class="pre">nb_it</span></code> constant for different DeepProg instances. Different seed values can produce different performances since it creates different training datasets and is especially true when using low <code class="docutils literal notranslate"><span class="pre">nb_it</span></code> (below 50). Unfortunalley, using large <code class="docutils literal notranslate"><span class="pre">nb_it</span></code> such as 100 can be very computationally intensive, especially when tuning the models with other hyperparameters. However, tuning the model with small <code class="docutils literal notranslate"><span class="pre">nb_it</span></code> is also OK to achieve good to optimal performances (see next section).</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="usage-of-metadata-associated-with-patients">
+<h2>Usage of metadata associated with patients<a class="headerlink" href="#usage-of-metadata-associated-with-patients" title="Permalink to this headline">¶</a></h2>
+<p>DeepProg can accept an additional metadata file characterizing the individual sample (patient). These metdata can optionally be used as covariates when constructing the DeepProg models or inferring the features associated with each inferred subtypes. The metadata file should be a samples x features table with the first line as header with variable name and the first column the sample IDs. Also, the metadata file can be used to filter a subset of samples.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># See the example metadata table from the file: examples/data/metadata_dummy.tsv:</span>
+
+head examples/data/metadata_dummy.tsv
+
+barcode sex     stage
+sample_test_0   M       I
+sample_test_1   M       I
+sample_test_2   M       I
+sample_test_3   M       I
+sample_test_4   M       I
+sample_test_5   M       I
+</pre></div>
+</div>
+<p>Each of the column features containing only numeric values will be scaled using the sklearn <code class="docutils literal notranslate"><span class="pre">RobustScaler</span></code> method. Each of the column having string values will be one-hot encoded using all the possible values of the given feature and stacked together.</p>
+<p>The metadata file and the metadata usage should be configured at the instantiation of a new <code class="docutils literal notranslate"><span class="pre">DeepProg</span></code> instance.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="c1"># metadata file</span>
+    <span class="n">OPTIONAL_METADATA</span> <span class="o">=</span> <span class="s1">&#39;examples/data/metadata_dummy.tsv&#39;</span>
+    <span class="c1"># dictionary used to filter samples based on their metadata values</span>
+    <span class="c1"># Multiple fields can be used</span>
+    <span class="n">SUBSET_TRAINING_WITH_META</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;stage&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;I&#39;</span><span class="p">,</span> <span class="s1">&#39;II&#39;</span><span class="p">,</span> <span class="s1">&#39;III&#39;</span><span class="p">]}</span>
+
+    <span class="n">boosting</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+        <span class="n">survival_tsv</span><span class="o">=</span><span class="n">SURVIVAL_TSV</span><span class="p">,</span>
+        <span class="n">training_tsv</span><span class="o">=</span><span class="n">TRAINING_TSV</span><span class="p">,</span>
+        <span class="n">metadata_tsv</span><span class="o">=</span><span class="n">OPTIONAL_METADATA</span><span class="p">,</span>
+        <span class="n">metadata_usage</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
+        <span class="n">subset_training_with_meta</span><span class="o">=</span><span class="n">SUBSET_TRAINING_WITH_META</span><span class="p">,</span>
+        <span class="o">...</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">metadata_usage</span></code> can have different values:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code>: the metadata will not be used for constructing DeepProg models or computing significant features</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'&quot;labels&quot;'</span></code>: The metadata matrix will only be used as covariates when inferring the survival models from the infered clustering labels.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;new-features&quot;</span></code>: The metadata matrix will only be used as covariates when computing the survival models to infer new features linked to survival</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;test-labels&quot;</span></code>: The metadata matrix will only be used as covariates when inferring the survival models from the labels obtained for the test datasets</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;all&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">True</span></code>: use the metadata matrix for all the usages described above.</p></li>
+</ul>
+</div>
+<div class="section" id="computing-cluster-specific-feature-signatures">
+<h2>Computing cluster-specific feature signatures<a class="headerlink" href="#computing-cluster-specific-feature-signatures" title="Permalink to this headline">¶</a></h2>
+<p>Once a DeepProg model is fitted, two functions can be used to infer the features signature of each subtype:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">compute_feature_scores_per_cluster</span></code>: Perform a mann-Withney test between the expression of each feature within and without the subtype</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">compute_survival_feature_scores_per_cluster</span></code>: This function computes the Log-rank p-value after fitting an individual Cox-PH model for each of the significant features inferred by <code class="docutils literal notranslate"><span class="pre">compute_feature_scores_per_cluster</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="save-load-models">
+<h2>Save / load models<a class="headerlink" href="#save-load-models" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="save-load-the-entire-model">
+<h3>Save /load the entire model<a class="headerlink" href="#save-load-the-entire-model" title="Permalink to this headline">¶</a></h3>
+<p>Despite dealing with very voluminous data files, Two mechanisms exist to save and load dataset.
+First the models can be entirely saved and loaded using <code class="docutils literal notranslate"><span class="pre">dill</span></code> (pickle like) libraries.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">simdeep.simdeep_utils</span> <span class="kn">import</span> <span class="n">save_model</span>
+<span class="kn">from</span> <span class="nn">simdeep.simdeep_utils</span> <span class="kn">import</span> <span class="n">load_model</span>
+
+<span class="c1"># Save previous boosting model</span>
+<span class="n">save_model</span><span class="p">(</span><span class="n">boosting</span><span class="p">,</span> <span class="s2">&quot;./test_saved_model&quot;</span><span class="p">)</span>
+
+<span class="c1"># Delete previous model</span>
+<span class="k">del</span> <span class="n">boosting</span>
+
+<span class="c1"># Load model</span>
+<span class="n">boosting</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="s2">&quot;TestProject&quot;</span><span class="p">,</span> <span class="s2">&quot;./test_saved_model&quot;</span><span class="p">)</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">predict_labels_on_full_dataset</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>See an example of saving/loading model in the example file: <code class="docutils literal notranslate"><span class="pre">load_and_save_models.py</span></code></p>
+</div>
+<div class="section" id="save-load-models-from-precomputed-sample-labels">
+<h3>Save / load models from precomputed sample labels<a class="headerlink" href="#save-load-models-from-precomputed-sample-labels" title="Permalink to this headline">¶</a></h3>
+<p>However, this mechanism presents a huge drawback since the models saved can be very large (all the hyperparameters/matrices… etc… are saved). Also, the equivalent dependencies and DL libraries need to be installed in both the machine computing the models and the machine used to load them which can lead to various errors.</p>
+<p>A second solution is to save only the labels inferred for each submodel instance. These label files can then be loaded into a new DeepProg instance that will be used as reference for building the classifier.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<span class="c1"># Fitting a model</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="c1"># Saving individual labels</span>
+<span class="n">boosting</span><span class="o">.</span><span class="n">save_test_models_classes</span><span class="p">(</span>
+    <span class="n">path_results</span><span class="o">=</span><span class="n">PATH_PRECOMPUTED_LABELS</span> <span class="c1"># Where to save the labels</span>
+    <span class="p">)</span>
+
+<span class="n">boostingNew</span> <span class="o">=</span> <span class="n">SimDeepBoosting</span><span class="p">(</span>
+        <span class="n">survival_tsv</span><span class="o">=</span><span class="n">SURVIVAL_TSV</span><span class="p">,</span> <span class="c1"># Same reference training set for `boosting` model</span>
+        <span class="n">training_tsv</span><span class="o">=</span><span class="n">TRAINING_TSV</span><span class="p">,</span> <span class="c1"># Same reference training set for `boosting` model</span>
+        <span class="n">path_data</span><span class="o">=</span><span class="n">PATH_DATA</span><span class="p">,</span>
+        <span class="n">project_name</span><span class="o">=</span><span class="n">PROJECT_NAME</span><span class="p">,</span>
+        <span class="n">path_results</span><span class="o">=</span><span class="n">PATH_DATA</span><span class="p">,</span>
+        <span class="n">distribute</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="c1"># Option to use ray cluster scheduler (True or False)</span>
+    <span class="p">)</span>
+
+<span class="n">boostingNew</span><span class="o">.</span><span class="n">fit_on_pretrained_label_file</span><span class="p">(</span>
+    <span class="n">labels_files_folder</span><span class="o">=</span><span class="n">PATH_PRECOMPUTED_LABELS</span><span class="p">,</span>
+    <span class="n">file_name_regex</span><span class="o">=</span><span class="s2">&quot;*.tsv&quot;</span><span class="p">)</span>
+
+<span class="n">boostingNew</span><span class="o">.</span><span class="n">predict_labels_on_full_dataset</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="case_study.html" class="btn btn-neutral float-right" title="Case study: Analyzing TCGA HCC dataset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="usage_ensemble.html" class="btn btn-neutral float-left" title="Tutorial: Ensemble of DeepProg model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, Olivier Poirion.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
