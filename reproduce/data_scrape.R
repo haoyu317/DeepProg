@@ -28,12 +28,12 @@ source("Module_A.R")
 source("Module_B.R")
 
 #' set data saving path
-sPath1 <- "./QuickStartExample/HCC/Part1_DownloadedData"
-sPath2 <- "./QuickStartExample/HCC/Part2_BasicDataProcessingResult"
-sPath3 <- "./QuickStartExample/HCC/Part3_AdvancedDataProcessingResult"
+sPath1 <- "./QuickStartExample/ESCA/Part1_DownloadedData"
+sPath2 <- "./QuickStartExample/ESCA/Part2_BasicDataProcessingResult"
+sPath3 <- "./QuickStartExample/ESCA/Part3_AdvancedDataProcessingResult"
 
 #' choose a cancer type
-sCancer <- "ACC"
+sCancer <- "ESCA"
 
 #' choose some patients
 # vPatientID <- c("TCGA-A7-A13F", "TCGA-AO-A12B")
@@ -50,11 +50,11 @@ path_somaticMutation <-
 															saveFolderName = sPath1)
 
 #' Download copy number alternation data
-path_copyNumber <-
-	DownloadCNAData(cancerType = sCancer,
-									assayPlatform = "cna_cnv.hg19",
-									inputPatientIDs = vPatientID,
-									saveFolderName = sPath1)
+# path_copyNumber <-
+# 	DownloadCNAData(cancerType = sCancer,
+# 									assayPlatform = "cna_cnv.hg19",
+# 									inputPatientIDs = vPatientID,
+# 									saveFolderName = sPath1)
 #' Download DNA methylation 450 data
 path_methylation_450 <-
 	DownloadMethylationData(cancerType = sCancer,
@@ -87,13 +87,13 @@ list_somaticMutation <-
 
 #' Process copy number alternation data
 #' calculate an average copy number for each gene in each sample
-list_copyNumber <-
-	ProcessCNAData(inputFilePath = path_copyNumber[1],
-								 outputFileName = paste(sCancer,
-																				"copyNumber",
-																				sep = "__"),
-								 refGenomeFile = "./SupportingFiles/Hg19GenePosition.txt",
-								 outputFileFolder = sPath2)
+# list_copyNumber <-
+# 	ProcessCNAData(inputFilePath = path_copyNumber[1],
+# 								 outputFileName = paste(sCancer,
+# 																				"copyNumber",
+# 																				sep = "__"),
+# 								 refGenomeFile = "./SupportingFiles/Hg19GenePosition.txt",
+# 								 outputFileFolder = sPath2)
 
 #' Process DNA methylation 450 data
 list_methylation_450 <-
