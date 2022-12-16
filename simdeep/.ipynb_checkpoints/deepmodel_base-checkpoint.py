@@ -22,6 +22,7 @@ try:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         import tensorflow as tf
+        print(tf.__version__)
         tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 except Exception:
     pass
@@ -204,7 +205,7 @@ class DeepBase(object):
     def _create_autoencoder(self, matrix_train, key, matrix_out=None):
         """
         Instantiate the  autoencoder architecture
-        """
+        """ 
         if self.verbose:
             print('creating autoencoder...')
         t = time()
@@ -391,23 +392,26 @@ class DeepBase(object):
         :fname: str    the name of the file to load
         """
         for key in self.matrix_train_array:
-            file_path = '{0}/{1}_{2}'.format(self.path_to_save_model, key, fname)
-            try:
-                assert(isfile(file_path))
-            except AssertionError:
-                if self.verbose:
-                    print('try loading autoencoder for {0} but file not found'.format(file_path))
-                    print('no encoder loaded')
-                    self.encoder_array = {}
-                    return
 
-            t = time()
-            encoder = load_model(file_path)
 
-            if self.verbose:
-                print('model {1} loaded in {0} s!'.format(time() - t, key))
-
-            self.encoder_array[key] = encoder
+            if (key == 'drug' or key == 'ablation'):
+#                 print("for drug")
+#                 print(self.matrix_train_array[key].shape)
+                self.encoder_array[key] = self.matrix_train_array[key]
+            else:
+                file_path = '{0}/{1}_{2}'.format(self.path_to_save_model, key, fname)
+                try:
+                    assert(isfile(file_path))
+                except AssertionError:
+                    if self.verbose:
+                        print('try loading autoencoder for {0} but file not found'.format(file_path))
+                        print('no encoder loaded')
+                        self.encoder_array = {}
+                        return
+                encoder = load_model(file_path)
+                print("for other information")
+                self.encoder_array[key] = encoder
+                
             self.is_model_loaded = True
 
 

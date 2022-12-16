@@ -48,6 +48,7 @@ from simdeep.simdeep_utils import feature_selection_usage_type
 from simdeep.simdeep_utils import load_labels_file
 
 from simdeep.coxph_from_r import coxph
+from simdeep.coxph_from_r import coxph_from_python_mult
 from simdeep.coxph_from_r import c_index
 from simdeep.coxph_from_r import c_index_multiple
 
@@ -81,6 +82,7 @@ from os import mkdir
 ################ VARIABLE ############################################
 _CLASSIFICATION_METHOD_LIST = ['ALL_FEATURES', 'SURVIVAL_FEATURES']
 MODEL_THRES = 0.05
+USE_MULT_COXPH = True
 ######################################################################
 
 
@@ -267,7 +269,6 @@ class SimDeep(DeepBase):
         """
         """
         assert(self.node_selection in ['Cox-PH', 'C-index'])
-
         if self.metadata_usage in ['all', 'new-features'] and \
            self.dataset.metadata_mat is not None:
             metadata_mat = self.dataset.metadata_mat
@@ -422,16 +423,13 @@ class SimDeep(DeepBase):
                 self.fit_alternative_embedding()
             else:
                 self.construct_autoencoders()
-
         self.look_for_survival_nodes()
-
         self.training_omic_list = list(self.encoder_array.keys())
         self.predict_labels()
 
         self.used_normalization = {key: self.dataset.normalization[key]
                                    for key in self.dataset.normalization
                                    if self.dataset.normalization[key]}
-
         self.used_features_for_classif = self.dataset.feature_train_array
         self.fit_classification_model()
 
@@ -1027,67 +1025,87 @@ class SimDeep(DeepBase):
 
         if keys is None:
             keys = list(matrix_array.keys())
+            
 
+            
         for key in keys:
-            matrix = matrix_array[key]
-            if not self._pretrained_model:
-                if self.alternative_embedding is  None and \
-                   self.encoder_input_shape(key)[1] != matrix.shape[1]:
-                    if self.verbose:
-                        print('matrix doesnt have the input dimension of the encoder'\
-                              ' returning None')
-                    return None
-
-            if self.alternative_embedding is not None:
-                activities = self.embedding_predict(key, matrix)
-            elif self.use_autoencoders:
-                activities = self.encoder_predict(key, matrix)
+            if  key == "percentage":
+                pass
+            if key == "drug":
+                activities_array[key] = matrix_array[key]
             else:
-                activities = np.asarray(matrix)
+                matrix = matrix_array[key]
+                if not self._pretrained_model:
+                    if self.alternative_embedding is  None and \
+                       self.encoder_input_shape(key)[1] != matrix.shape[1]:
+                        if self.verbose:
+                            print('matrix doesnt have the input dimension of the encoder'\
+                                  ' returning None')
+                        return None
 
-            activities_array[key] = activities.T[self.valid_node_ids_array[key]].T
+                if self.alternative_embedding is not None:
+                    activities = self.embedding_predict(key, matrix)
+                elif self.use_autoencoders:
+                    activities = self.encoder_predict(key, matrix)
+                else:
+                    activities = np.asarray(matrix)
 
+                activities_array[key] = activities.T[self.valid_node_ids_array[key]].T
+        if "RNA" in keys and "percentage" in keys:
+            activities_array['RNA'] = np.concatenate((activities_array["RNA"], matrix_array["percentage"]), axis=1) 
+        if "RNA" in keys and "percentage" not in keys:
+            activities_array['RNA'] = activities_array["RNA"]
+            
         return hstack([activities_array[key]
-                       for key in keys])
+                       for key in activities_array.keys()])
 
     def look_for_survival_nodes(self, keys=None):
         """
         detect nodes from the autoencoder significantly
         linked with survival through coxph regression
         """
+
         if not keys:
             keys = list(self.encoder_array.keys())
 
             if not keys:
                 keys = self.matrix_train_array.keys()
 
+            
         for key in keys:
-#             print(key)
-#             print(self.matrix_train_array.shape)
-            matrix_train = self.matrix_train_array[key]
-#             print(matrix_train.shape)
-            if self.alternative_embedding is not None:
-                activities = self.embedding_predict(key, matrix_train)
-            elif self.use_autoencoders:
-                activities = self.encoder_predict(key, matrix_train)
+            if key == "percentage":
+                pass
+            if key == "drug":
+                self.activities_array[key] = self.matrix_train_array[key]
             else:
-                activities = np.asarray(matrix_train)
+                matrix_train = self.matrix_train_array[key]
 
-            if self.feature_surv_analysis:
-                valid_node_ids = self._look_for_nodes(key)
-            else:
-                valid_node_ids = np.arange(matrix_train.shape[1])
+                if self.alternative_embedding is not None:
+                    activities = self.embedding_predict(key, matrix_train)
+                elif self.use_autoencoders:
+                    activities = self.encoder_predict(key, matrix_train)
+                else:
+                    activities = np.asarray(matrix_train)
 
-            self.valid_node_ids_array[key] = valid_node_ids
-            self.activities_array[key] = activities.T[valid_node_ids].T
+                if self.feature_surv_analysis:
+                    valid_node_ids = self._look_for_nodes(key)
+                else:
+                    valid_node_ids = np.arange(matrix_train.shape[1])
 
+                self.valid_node_ids_array[key] = valid_node_ids
+                self.activities_array[key] = activities.T[valid_node_ids].T
+                
+        if "RNA" in keys and "percentage" in keys:
+            self.activities_array['RNA'] =  np.concatenate((self.activities_array["RNA"], self.matrix_train_array["percentage"]), axis=1) 
+        if "RNA" in keys and "percentage" not in keys:
+            self.activities_array['RNA'] =  self.activities_array["RNA"]
+            
+#         self.activities_array['RNA'] =  np.concatenate((self.activities_array["RNA"], self.matrix_train_array["percentage"]), axis=1) 
         if self.clustering_omics:
             keys = self.clustering_omics
-
         self.activities_train = hstack([self.activities_array[key]
-                                        for key in keys])
-#         matrix_train = hstack([self.matrix_train_array[key]
-#                                         for key in keys])
+                                        for key in self.activities_array.keys()])
+
         
 
     def look_for_prediction_nodes(self, keys=None):
@@ -1097,28 +1115,38 @@ class SimDeep(DeepBase):
         """
         if not keys:
             keys = list(self.encoder_array.keys())
+        
 
         for key in keys:
-            matrix_train = self.matrix_train_array[key]
-
-            if self.alternative_embedding is not None:
-                activities = self.embedding_predict(key, matrix_train)
-            elif self.use_autoencoders:
-                activities = self.encoder_predict(key, matrix_train)
+            if key == "percentage":
+                pass
+            if key == "drug":
+                self.activities_pred_array[key] = self.matrix_train_array[key]
             else:
-                activities = np.asarray(matrix_train)
+                matrix_train = self.matrix_train_array[key]
 
-            if self.feature_surv_analysis:
-                valid_node_ids = self._look_for_prediction_nodes(key)
-            else:
-                valid_node_ids = np.arange(matrix_train.shape[1])
+                if self.alternative_embedding is not None:
+                    activities = self.embedding_predict(key, matrix_train)
+                elif self.use_autoencoders:
+                    activities = self.encoder_predict(key, matrix_train)
+                else:
+                    activities = np.asarray(matrix_train)
 
-            self.pred_node_ids_array[key] = valid_node_ids
+                if self.feature_surv_analysis:
+                    valid_node_ids = self._look_for_prediction_nodes(key)
+                else:
+                    valid_node_ids = np.arange(matrix_train.shape[1])
 
-            self.activities_pred_array[key] = activities.T[valid_node_ids].T
+                self.pred_node_ids_array[key] = valid_node_ids
 
+                self.activities_pred_array[key] = activities.T[valid_node_ids].T
+                
+        if "RNA" in keys and "percentage" in keys:
+            self.activities_pred_array['RNA'] = np.concatenate((self.activities_pred_array["RNA"], self.matrix_train_array["percentage"]), axis=1) 
+        if "RNA" in keys and "percentage" not in keys:
+            self.activities_pred_array['RNA'] = self.activities_pred_array["RNA"]
         self.activities_for_pred_train = hstack([self.activities_pred_array[key]
-                                                 for key in keys])
+                                                 for key in self.activities_pred_array.keys()])
 
     def compute_c_indexes_multiple_for_test_dataset(self):
         """
@@ -1311,7 +1339,6 @@ class SimDeep(DeepBase):
         """
         if key is not None:
             matrix_train = self.matrix_train_array[key]
-
             if self.alternative_embedding is not None:
                 activities = np.nan_to_num(self.embedding_predict(
                     key, matrix_train))
@@ -1337,22 +1364,36 @@ class SimDeep(DeepBase):
                 metadata_mat=metadata_mat)
 
             return cws.get_nonzero_features(activities)
-
+        elif USE_MULT_COXPH:
+            return self._get_survival_features_parallel_mult(
+                isdead, nbdays, metadata_mat, activities, key)
         else:
             return self._get_survival_features_parallel(
                 isdead, nbdays, metadata_mat, activities, key)
+        
+    def _get_survival_features_parallel_mult(
+            self, isdead, nbdays, metadata_mat, activities, key):
+        """ """
+        pvalue_list = coxph_from_python_mult(values = activities, isdead = isdead, nbdays = nbdays)
+        valid_node_ids = [node_id for node_id, pvalue in enumerate(pvalue_list)
+                          if pvalue < 0.05]
 
+        if self.verbose:
+            print('number of components linked to survival found:{0} for key {1}'.format(
+                len(valid_node_ids), key))
+
+        return valid_node_ids
+
+    
     def _get_survival_features_parallel(
             self, isdead, nbdays, metadata_mat, activities, key):
         """ """
         pool = None
-
         if not self._isboosting:
             pool = Pool(self.nb_threads_coxph)
             mapf = pool.map
         else:
             mapf = map
-
         input_list = iter((node_id,
                            activity,
                            isdead,
@@ -1361,9 +1402,7 @@ class SimDeep(DeepBase):
                            metadata_mat, self.use_r_packages)
 
                           for node_id, activity in enumerate(activities.T))
-
         pvalue_list = mapf(_process_parallel_coxph, input_list)
-
         pvalue_list = list(filter(lambda x: not np.isnan(x[1]), pvalue_list))
         pvalue_list.sort(key=lambda x: x[1], reverse=True)
 

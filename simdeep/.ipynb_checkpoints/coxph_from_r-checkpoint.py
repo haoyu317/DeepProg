@@ -34,8 +34,9 @@ try:
         from rpy2.robjects import FloatVector
         from rpy2.robjects import StrVector
         from rpy2.robjects import Formula
-
+        import rpy2.robjects as robjects
         survival = importr('survival')
+        penalized = importr('penalized')
         survcomp = importr('survcomp')
         glmnet = importr('glmnet')
 
@@ -111,7 +112,7 @@ def coxph_from_python(
         metadata_mat=None,
         dichotomize_afterward=False,
         fig_name='KM_plot.pdf',
-        penalizer=0.01,
+        penalizer=0.00,
         l1_ratio=0.0,
         isfactor=False):
     """
@@ -119,7 +120,6 @@ def coxph_from_python(
     values = np.asarray(values)
     isdead = np.asarray(isdead)
     nbdays = np.asarray(nbdays)
-
     if isfactor:
         values = np.asarray(values).astype("str")
 
@@ -141,10 +141,10 @@ def coxph_from_python(
             "isdead": isdead,
             "nbdays": nbdays
         })
-        penalizer = 0.0
-
+    penalizer = 0.0
+    l1_ratio = 0.0
     cph = CoxPHFitter(penalizer=penalizer, l1_ratio=l1_ratio)
-
+#     print(frame)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
 
@@ -155,39 +155,48 @@ def coxph_from_python(
 
         except Exception:
             return np.nan
-
     pvalue = cph.log_likelihood_ratio_test().p_value
     cindex = cph.concordance_index_
 
     if do_KM_plot:
-        fig, ax = plt.subplots(figsize=(10, 10))
+#         fig, ax = plt.subplots(figsize=(10, 10))
 
-        kaplan = KaplanMeierFitter()
+#         kaplan = KaplanMeierFitter()
 
-        for label in set(values):
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                kaplan.fit(
-                    #values[values==label],
-                nbdays[values==label],
-                    event_observed=isdead[values==label],
-                    label='cluster nb. {0}'.format(label)
-                )
+#         for label in set(values):
+#             with warnings.catch_warnings():
+#                 warnings.simplefilter("ignore")
+#                 kaplan.fit(
+#                     #values[values==label],
+#                 nbdays[values==label],
+#                     event_observed=isdead[values==label],
+#                     label='cluster nb. {0}'.format(label)
+#                 )
 
-            kaplan.plot(ax=ax,
-                        ci_alpha=0.15)
+#             kaplan.plot(ax=ax,
+#                         ci_alpha=0.15)
 
-        ax.set_xlabel('time unit')
-        ax.set_title('pval.: {0: .1e} CI: {1: .2f}'.format(
-            pvalue, cindex),
-                     fontsize=16,
-                     fontweight='bold')
+#         ax.set_xlabel('time unit')
+#         ax.set_title('pval.: {0: .1e} CI: {1: .2f}'.format(
+#             pvalue, cindex),
+#                      fontsize=16,
+#                      fontweight='bold')
 
-        figname = "{0}/{1}.pdf".format(
-            png_path, fig_name.replace('.pdf', '').replace('.png', ''))
+#         figname = "{0}/{1}.pdf".format(
+#             png_path, fig_name.replace('.pdf', '').replace('.png', ''))
 
-        fig.savefig(figname)
-        print('Figure saved in: {0}'.format(figname))
+#         fig.savefig(figname)
+#         print('Figure saved in: {0}'.format(figname))
+        isdead = FloatVector(isdead)
+        nbdays = FloatVector(nbdays)
+        values = FloatVector(values)
+        c_index_to_print = c_index_from_r(
+            values, isdead, nbdays, values, isdead, nbdays,
+            isfactor=isfactor
+        )
+        df = pd.DataFrame({"cindex":[c_index_to_print]})
+        path = png_path + '/../result.csv'
+        df.to_csv(path, mode = 'a', index = False, header = False)
 
     return pvalue
 
@@ -208,12 +217,12 @@ def coxph(values,
     if seed:
         np.random.seed(int(seed))
 
-#     if use_r_packages:
-#         func = coxph_from_r
-#     else:
-#         func = coxph_from_python
+    if use_r_packages:
+        func = coxph_from_r
+    else:
+        func = coxph_from_python
 #     func = coxph_from_r
-    func = coxph_from_r
+#     func = coxph_from_r
 
     return func(
         values,
@@ -227,6 +236,87 @@ def coxph(values,
         isfactor=isfactor
     )
 
+def coxph_from_python_mult(
+        values,
+        isdead,
+        nbdays,
+        do_KM_plot=False,
+        png_path='./',
+        metadata_mat=None,
+        dichotomize_afterward=False,
+        fig_name='KM_plot.pdf',
+        penalizer=0.00,
+        l1_ratio=0.0,
+        isfactor=False):
+    """
+    """
+    values = np.asarray(values)
+    isdead = np.asarray(isdead)
+    nbdays = np.asarray(nbdays)
+    if isfactor:
+        values = np.asarray(values).astype("str")
+    columns = ["column{0}".format(i) for i in range(values.shape[1])]
+    frame = pd.DataFrame(values, columns = columns)
+    frame['isdead'] = isdead
+    frame['nbdays'] = nbdays
+    penalizer = 0.01
+    l1_ratio = 0.01
+    cph = CoxPHFitter(penalizer=penalizer, l1_ratio=l1_ratio)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                cph.fit(frame, "nbdays", "isdead")
+
+        except Exception:
+            return np.nan
+
+#     pvalue = cph.log_likelihood_ratio_test().p_value
+#     cindex = cph.concordance_index_
+    pvalue_list = cph.summary.p.tolist()
+    if do_KM_plot:
+#         fig, ax = plt.subplots(figsize=(10, 10))
+
+#         kaplan = KaplanMeierFitter()
+
+#         for label in set(values):
+#             with warnings.catch_warnings():
+#                 warnings.simplefilter("ignore")
+#                 kaplan.fit(
+#                     #values[values==label],
+#                 nbdays[values==label],
+#                     event_observed=isdead[values==label],
+#                     label='cluster nb. {0}'.format(label)
+#                 )
+
+#             kaplan.plot(ax=ax,
+#                         ci_alpha=0.15)
+
+#         ax.set_xlabel('time unit')
+#         ax.set_title('pval.: {0: .1e} CI: {1: .2f}'.format(
+#             pvalue, cindex),
+#                      fontsize=16,
+#                      fontweight='bold')
+
+#         figname = "{0}/{1}.pdf".format(
+#             png_path, fig_name.replace('.pdf', '').replace('.png', ''))
+
+#         fig.savefig(figname)
+#         print('Figure saved in: {0}'.format(figname))
+        isdead = FloatVector(isdead)
+        nbdays = FloatVector(nbdays)
+        values = FloatVector(values)
+        c_index_to_print = c_index_from_r(
+            values, isdead, nbdays, values, isdead, nbdays,
+            isfactor=isfactor
+        )
+        df = pd.DataFrame({"cindex":[c_index_to_print]})
+        path = png_path + '/../result.csv'
+        df.to_csv(path, mode = 'a', index = False, header = False)
+
+    return pvalue_list 
 def coxph_from_r(
         values,
         isdead,
@@ -253,60 +343,65 @@ def coxph_from_r(
         values = StrVector([v for v in map(str, values)])
     else:
         values = FloatVector(values)
-#     print(type(values))
-    cox = Formula('Surv(nbdays, isdead) ~ values')
-
-    cox.environment['nbdays'] = nbdays
-    cox.environment['isdead'] = isdead
-    cox.environment['values'] = values
-
+#     cox = Formula('penalized(Surv(nbdays, isdead) , penalized = values, data = values, lambda1 = 0.1)')
+#     cox = Formula('Surv(nbdays, isdead) ~ values')
+    robjects.globalenv['nbdays'] = nbdays
+    robjects.globalenv['isdead'] = isdead
+    robjects.globalenv['values'] = values
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
 
-            res = survival.coxph(cox)
+#         res = survival.coxph(cox)
+        print('-------------------------start coxph model-------------------------')
+        print(type(nbdays))
+        print(isdead)
+        print(values)
+        res = penalized.penalized('penalized(Surv(nbdays, isdead) , penalized = values, data = values, lambda1 = 0.1)')
     except Exception as e:
         warnings.warn('Cox-PH didnt fit return NaN: {0}'.format(e))
         return np.nan
-
     pvalue = rob.r.summary(res)[-5][2]
     # color = ['green', 'blue', 'red']
 
     pvalue_to_print = pvalue
 
     if do_KM_plot:
-        if dichotomize_afterward:
-            frame = rob.r('data.frame')
-            predicted = np.array(rob.r.predict(res, frame(values=values)))
-            new_values = predicted.copy()
-            med = np.median(predicted)
-            new_values[predicted >= med] = 0
-            new_values[predicted < med] = 1
-            new_values = FloatVector(new_values)
-            pvalue_to_print = coxph(new_values, isdead, nbdays)
+#         print(png_path)
+#         if dichotomize_afterward:
+#             frame = rob.r('data.frame')
+#             predicted = np.array(rob.r.predict(res, frame(values=values)))
+#             new_values = predicted.copy()
+#             med = np.median(predicted)
+#             new_values[predicted >= med] = 0
+#             new_values[predicted < med] = 1
+#             new_values = FloatVector(new_values)
+#             pvalue_to_print = coxph(new_values, isdead, nbdays)
 
-            cox.environment['values'] = new_values
+#             cox.environment['values'] = new_values
 
         c_index_to_print = c_index_from_r(
             values, isdead, nbdays, values, isdead, nbdays,
             isfactor=isfactor
         )
+        df = pd.DataFrame({"cindex":[c_index_to_print]})
+        path = png_path + '/../result.csv'
+        df.to_csv(path, mode = 'a', index = False, header = False)
+#         surv = survival.survfit(cox)
+#         rob.r.png("{0}/{1}.png".format(png_path, fig_name.replace('.png', '')))
+#         rob.r.plot(surv,
+#                    col=rob.r("2:8"),
+#                    xlab="Days",
+#                    ylab="Probablity of survival",
+#                    sub='pvalue: {0} cindex: {1}'.format(pvalue_to_print, c_index_to_print),
+#                    lwd=3,
+#                    mark_time=True
+#             )
 
-        surv = survival.survfit(cox)
-        rob.r.png("{0}/{1}.png".format(png_path, fig_name.replace('.png', '')))
-        rob.r.plot(surv,
-                   col=rob.r("2:8"),
-                   xlab="Days",
-                   ylab="Probablity of survival",
-                   sub='pvalue: {0} cindex: {1}'.format(pvalue_to_print, c_index_to_print),
-                   lwd=3,
-                   mark_time=True
-            )
+#         rob.r("dev.off()")
+#         print("{0}/{1}.png saved!".format(png_path, fig_name.replace('.png', '')))
 
-        rob.r("dev.off()")
-        print("{0}/{1}.png saved!".format(png_path, fig_name.replace('.png', '')))
-
-        del res, surv, cox
+#         del res, surv, cox
 
     return pvalue
 
@@ -326,12 +421,11 @@ def c_index(
     if seed:
         np.random.seed(int(seed))
 
-#     if use_r_packages:
-#         func = c_index_from_r
-#     else:
-#         func = c_index_from_python
+    if use_r_packages:
+        func = c_index_from_r
+    else:
+        func = c_index_from_python
 #     print("using r")
-#     func = c_index_from_r
     func = c_index_from_r
     return func(
         values,
@@ -464,7 +558,6 @@ def c_index_from_r(values,
     rob.r('set.seed(2016)')
     isdead = FloatVector(isdead)
     isdead_test = FloatVector(isdead_test)
-    print("single from r")
     nbdays = FloatVector(nbdays)
     nbdays_test = FloatVector(nbdays_test)
 

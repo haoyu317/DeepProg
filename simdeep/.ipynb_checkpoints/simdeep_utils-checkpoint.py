@@ -12,10 +12,10 @@ from os import mkdir
 # else:
 #     import cPickle
 
-import dill
+import pickle
 
 from time import time
-
+import dill
 def save_model(boosting, path_to_save_model=PATH_TO_SAVE_MODEL):
     """ """
     if not isdir(path_to_save_model):
